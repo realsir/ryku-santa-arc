@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>RYKU SANTA Gallery</title>
+
+  <!-- Шрифт Poppins -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg-color: #c0ff38;
+      --text-color: #111111;
+      --frame-color: #ffffff;
+      --frame-shadow: rgba(0, 0, 0, 0.2);
+      --transition-speed: 0.8s;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: var(--bg-color);
+      font-family: "Poppins", sans-serif;
+      color: var(--text-color);
+      font-weight: 500;
+    }
+
+    /* Floating icons */
+    .floating-layer {
+      position: fixed;
+      inset: 0;
+      overflow: hidden;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    .floating-item {
+      position: absolute;
+      width: 120px;
+      height: 120px;
+      opacity: 0.75;
+      animation: floatLinear var(--duration, 40s) linear infinite;
+      animation-delay: calc(var(--delay, 0s) * -1s);
+    }
+
+    .floating-item img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    @keyframes floatLinear {
+      0% { transform: translate3d(var(--start-x), var(--start-y), 0); }
+      100% { transform: translate3d(var(--end-x), var(--end-y), 0); }
+    }
+
+    .floating-item:nth-child(odd) {
+      animation-name: floatLinearOdd;
+    }
+
+    @keyframes floatLinearOdd {
+      0% { transform: translate3d(var(--start-x), var(--start-y), 0) scale(0.9) rotate(0deg); }
+      100% { transform: translate3d(var(--end-x), var(--end-y), 0) scale(1.1) rotate(360deg); }
+    }
+
+    /* Screens */
+    .intro-screen, .gallery-screen {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: opacity var(--transition-speed) ease, transform var(--transition-speed) ease;
+    }
+
+    .intro-screen { z-index: 2; }
+    .gallery-screen { 
+      z-index: 1; 
+      opacity: 0; 
+      transform: translateY(40px) scale(0.97); 
+      pointer-events: none; 
+    }
+
+    .gallery-screen.active {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+      pointer-events: auto;
+    }
+
+    .intro-screen.hidden {
+      opacity: 0;
+      transform: translateY(-40px) scale(0.95);
+      pointer-events: none;
+    }
+
+    /* Intro */
+    .intro-inner {
+      pointer-events: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+      align-items: center;
+      text-align: center;
+      padding: 2rem;
+    }
+
+    .intro-title {
+      font-size: clamp(2.5rem, 5vw, 3.5rem);
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      text-shadow: 0 4px 0 rgba(0, 0, 0, 0.12);
+      line-height: 1.1;
+    }
+
+    .intro-sub {
+      font-size: 1.1rem;
+      font-weight: 400;
+      max-width: 350px;
+      line-height: 1.5;
+    }
+
+    .main-button {
+      cursor: pointer;
+      border: none;
+      padding: 1rem 2.5rem;
+      border-radius: 999px;
+      background: #111111;
+      color: #ffffff;
+      font-size: 1.2rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.35);
+      transition: all 0.2s ease;
+    }
+
+    .main-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 14px 26px rgba(0, 0, 0, 0.45);
+    }
+
+    /* Gallery */
+    .gallery-inner {
+      width: min(1100px, 100%);
+      height: min(700px, 100%);
+      padding: 2rem 1.5rem 2.5rem;
+      border-radius: 32px;
+      background: rgba(255, 255, 255, 0.6);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
+      backdrop-filter: blur(18px);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .gallery-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+      gap: 1rem;
+    }
+
+    .gallery-title {
+      font-size: 2rem;
+      font-weight: 700;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+    }
+
+    .gallery-subtitle {
+      font-size: 0.95rem;
+      font-weight: 400;
+      opacity: 0.85;
+      max-width: 360px;
+      line-height: 1.5;
+    }
+
+    .back-button {
+      border-radius: 999px;
+      border: 1px solid rgba(0, 0, 0, 0.2);
+      background: rgba(255, 255, 255, 0.9);
+      padding: 0.4rem 1.2rem;
+      font-size: 0.85rem;
+      font-weight: 500;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .back-button:hover {
+      background: #f3f3f3;
+      transform: translateY(-1px);
+    }
+
+    /* ✅ 100% КЛИКАБЕЛЬНАЯ CSS GRID */
+    .gallery-grid {
+      flex: 1;
+      overflow-y: auto;
+      padding-right: 0.3rem;
+      padding-top: 1rem;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      grid-gap: 1.4rem;
+      align-content: start;
+    }
+
+    /* ✅ КЛЮЧЕВОЙ ФИКС - контейнер полностью кликабельный */
+    .gallery-item {
+      position: relative;
+      height: 280px;
+      border-radius: 18px;
+      background: var(--frame-color);
+      box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+      transition: all 0.3s ease;
+      cursor: pointer;
+      /* ✅ УБИРАЕМ overflow - это блокировало клики */
+    }
+
+    /* ✅ ССЫЛКА ПО ВСЕЙ ПЛОЩАДИ */
+    .gallery-link {
+      display: block !important;
+      position: absolute !important;
+      top: 0 !important;
+      left: 0 !important;
+      right: 0 !important;
+      bottom: 0 !important;
+      z-index: 2 !important;
+      text-decoration: none !important;
+      border-radius: 18px !important;
+      pointer-events: all !important;
+    }
+
+    /* ✅ ИЗОБРАЖЕНИЕ ПОД ССЫЛКОЙ */
+    .gallery-img {
+      width: 100% !important;
+      height: 100% !important;
+      object-fit: cover !important;
+      display: block !important;
+      border-radius: 18px !important;
+      transition: all 0.3s ease !important;
+      pointer-events: none !important; /* ✅ ИЗОБРАЖЕНИЕ НЕ БЛОКИРУЕТ КЛИКИ */
+    }
+
+    /* ✅ ХОВЕР */
+    .gallery-item:hover {
+      transform: translateY(-8px) !important;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.25) !important;
+    }
+
+    .gallery-item:hover .gallery-img {
+      transform: scale(1.05) !important;
+      filter: brightness(0.95) !important;
+    }
+
+    /* Scrollbar */
+    .gallery-grid::-webkit-scrollbar { width: 8px; }
+    .gallery-grid::-webkit-scrollbar-track { background: transparent; }
+    .gallery-grid::-webkit-scrollbar-thumb { 
+      background: rgba(0, 0, 0, 0.25);
+      border-radius: 999px;
+    }
+
+    @media (max-width: 768px) {
+      .gallery-inner {
+        border-radius: 0;
+        height: 100%;
+        width: 100%;
+      }
+      .gallery-header { 
+        flex-direction: column; 
+        align-items: flex-start; 
+      }
+      .gallery-title { font-size: 1.6rem; }
+      .gallery-grid {
+        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+        grid-gap: 1rem;
+      }
+      .gallery-item { height: 220px; }
+    }
+
+    @media (max-width: 480px) {
+      .gallery-grid {
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+        grid-gap: 0.8rem;
+      }
+      .gallery-item { height: 180px; }
+    }
+  </style>
+</head>
+<body>
+  <!-- 12 floating icons -->
+  <div class="floating-layer">
+    <div class="floating-item" style="--start-x:0vw; --start-y:10vh; --end-x:110vw; --end-y:20vh; --duration:45s; --delay:0;"><img src="r1.png" alt="icon"/></div>
+    <div class="floating-item" style="--start-x:-5vw; --start-y:80vh; --end-x:105vw; --end-y:85vh; --duration:60s; --delay:2;"><img src="r1.png" alt="icon"/></div>
+    <div class="floating-item" style="--start-x:-10vw; --start-y:35vh; --end-x:110vw; --end-y:45vh; --duration:52s; --delay:4;"><img src="r1.png" alt="icon"/></div>
+    <div class="floating-item" style="--start-x:5vw; --start-y:5vh; --end-x:115vw; --end-y:65vh; --duration:48s; --delay:6;"><img src="r1.png" alt="icon"/></div>
+    <div class="floating-item" style="--start-x:-8vw; --start-y:55vh; --end-x:108vw; --end-y:25vh; --duration:58s; --delay:8;"><img src="r1.png" alt="icon"/></div>
+    <div class="floating-item" style="--start-x:10vw; --start-y:95vh; --end-x:120vw; --end-y:15vh; --duration:62s; --delay:10;"><img src="r1.png" alt="icon"/></div>
+    <div class="floating-item" style="--start-x:90vw; --start-y:60vh; --end-x:-20vw; --end-y:50vh; --duration:55s; --delay:1;"><img src="r2.png" alt="icon"/></div>
+    <div class="floating-item" style="--start-x:95vw; --start-y:20vh; --end-x:-15vw; --end-y:15vh; --duration:50s; --delay:3;"><img src="r2.png" alt="icon"/></div>
+    <div class="floating-item" style="--start-x:100vw; --start-y:90vh; --end-x:-25vw; --end-y:75vh; --duration:65s; --delay:5;"><img src="r2.png" alt="icon"/></div>
+    <div class="floating-item" style="--start-x:85vw; --start-y:40vh; --end-x:-10vw; --end-y:80vh; --duration:53s; --delay:7;"><img src="r2.png" alt="icon"/></div>
+    <div class="floating-item" style="--start-x:92vw; --start-y:75vh; --end-x:-18vw; --end-y:30vh; --duration:57s; --delay:9;"><img src="r2.png" alt="icon"/></div>
+    <div class="floating-item" style="--start-x:88vw; --start-y:10vh; --end-x:-22vw; --end-y:90vh; --duration:61s; --delay:11;"><img src="r2.png" alt="icon"/></div>
+  </div>
+
+  <!-- Intro -->
+  <section class="intro-screen" id="intro">
+    <div class="intro-inner">
+      <h1 class="intro-title">RYKU SANTA</h1>
+      <p class="intro-sub">Go to the gallery to see the art created by the Raiku community. Every chad has contributed, and some of the images are extremely beautiful. </p>
+      <button class="main-button" id="enterButton">RYKU SANTA</button>
+    </div>
+  </section>
+
+  <!-- Gallery -->
+  <section class="gallery-screen" id="gallery">
+    <div class="gallery-inner">
+      <header class="gallery-header">
+        <div>
+          <h2 class="gallery-title">RYKU SANTA GALLERY</h2>
+          <p class="gallery-subtitle">Click on the art to go to X-post</p>
+        </div>
+        <button class="back-button" id="backButton">Back</button>
+      </header>
+
+      <div class="gallery-grid" id="galleryGrid">
+        <!-- Галерея заполняется JS -->
+      </div>
+    </div>
+  </section>
+
+  <script>
+    const galleryData = [
+      { img: '1.png', link: 'https://x.com/0x_Bamboo7/status/2003640813851672641?s=20' },
+      { img: '2.png', link: 'https://x.com/moodenger/status/2003741795679883757?s=20' },
+      { img: '3.png', link: 'https://x.com/TravTrix/status/2003811582003060939' },
+      { img: '4.png', link: 'https://x.com/pill_evm/status/2003867682597478756?s=20' },
+      { img: '5.png', link: 'https://x.com/BikoyInWeb3/status/2004132063453311391?s=20' },
+      { img: '6.png', link: 'https://x.com/judas__swing/status/2004233129176060189?s=20' },
+      { img: '7.png', link: 'https://x.com/evaneskate/status/2004292527030153650?s=20' },
+      { img: '8.png', link: 'https://x.com/edward_evm/status/2004300999662665912?s=20' },
+      { img: '9.png', link: 'https://x.com/Katunthe0ne/status/2004311147022016915?s=20' },
+      { img: '10.png', link: 'https://x.com/tulenka5/status/2004327258929119520?s=20' }
+    ];
+
+    // Navigation
+    document.getElementById('enterButton').onclick = () => {
+      document.getElementById('intro').classList.add('hidden');
+      document.getElementById('gallery').classList.add('active');
+      startGallery();
+    };
+
+    document.getElementById('backButton').onclick = () => {
+      document.getElementById('gallery').classList.remove('active');
+      document.getElementById('intro').classList.remove('hidden');
+    };
+
+    // Галерея
+    function startGallery() {
+      const gallery = document.getElementById('galleryGrid');
+      gallery.innerHTML = '';
+
+      galleryData.forEach((item, idx) => {
+        const galleryItem = document.createElement('div');
+        galleryItem.className = 'gallery-item';
+        
+        galleryItem.innerHTML = `
+          <a href="${item.link}" class="gallery-link" target="_blank" rel="noopener noreferrer">
+            <img src="${item.img}" alt="Ryku Santa ${idx + 1}" class="gallery-img" loading="lazy">
+          </a>
+        `;
+        
+        gallery.appendChild(galleryItem);
+      });
+    }
+  </script>
+</body>
+</html>
